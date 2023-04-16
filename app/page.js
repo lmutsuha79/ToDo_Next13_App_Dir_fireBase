@@ -1,91 +1,158 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from './page.module.css'
+"use client";
+import Image from "next/image";
+import { Inter } from "next/font/google";
+import AddNote from "./components/add-note";
+import AppHeader from "./components/app-header";
+import { useCallback, useEffect, useState } from "react";
+import Footer from "./components/footer";
+import NoteList from "./components/note-list";
+import { useRouter } from "next/navigation";
+import { getAuth, signOut } from "firebase/auth";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { db, initfirebase } from "@/firebase";
+import Loading from "./components/loading";
+import {
+  Firestore,
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+} from "firebase/firestore";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+  const markAsDone = useCallback(() =>{
+    console.log("markAsDone");
+
+    // const docRef = doc(db, "toDos", noteId);
+    // const docSnap = await getDoc(docRef);
+    // if (docSnap.exists()) {
+    //   // check if the userId in the note is the same ass the userId in the session
+    //   if (docSnap.data().userId == user.uid) {
+    //     // update the document
+    //     await setDoc(docRef, {
+    //       ...docSnap.data(),
+    //       isDone: true,
+    //     });
+    //     console.log("marked as done");
+    //   } else {
+    //   }
+    // } else {
+    //   // docSnap.data() will be undefined in this case
+    //   console.log("No such document!");
+    // }
+  },[])
+
+
+  initfirebase();
+  const auth = getAuth();
+  const [user, loading] = useAuthState(auth);
+  const [isAddNoteShown, setIsAddNoteShown] = useState(false);
+  const [notesAreLoading, setNoteAreLoading] = useState(false);
+  async function getAllNotes() {
+    setNoteAreLoading(true);
+    const q = query(collection(db, "toDos"), where("userId", "==", user.uid));
+
+    const querySnapshot = await getDocs(q);
+    const toDos = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    console.log("setting toDos");
+    console.log(toDos);
+    setNoteList(toDos);
+    setNoteAreLoading(false);
+  }
+  // use use reducer to add the change single note functionality
+  useEffect(() => {
+    console.log("loaded");
+
+    if (user) {
+      console.log("user");
+      getAllNotes();
+    }
+  }, [user, loading]);
+
+  const [notesList, setNoteList] = useState([]);
+  const router = useRouter();
+
+  function logout() {
+    signOut(auth)
+      .then(() => {
+        // Sign-out successful.
+        console.log("logout");
+      })
+      .catch((error) => {
+        console.log(error);
+        // An error happened.
+      });
+  }
+  async function saveNewNote({ title, description, dueDate }) {
+    try {
+      await addDoc(collection(db, "toDos"), {
+        title: title,
+        description: description,
+        dueDate: dueDate,
+        userId: user.uid,
+        isDone: false,
+        order: notesList.length + 1,
+      });
+      console.log("saved");
+      getAllNotes();
+    } catch (error) {
+      console.log("not saved");
+      console.log(error);
+    }
+  }
+
+  if (loading) {
+    console.log("Loading");
+    return <Loading />;
+  }
+  if (!user) {
+    console.log("user not login");
+    router.push("/auth");
+  }
+  if (user) {
+    console.log("user is already logged in");
+
+    return (
+      <main>
+        <div className="flex items-center justify-center w-screen h-screen font-medium">
+          <div className="flex flex-grow items-center justify-center bg-gray-900 h-full">
+            <div className="relative h-[80vh]  max-w-full px-8 bg-gray-800 rounded-lg shadow-lg w-96 text-gray-200">
+              <AppHeader logout={logout} />
+
+              <div className="h-[80%]">
+                {notesAreLoading ? (
+                  <p className="text-blue-gray">tasks are loading</p>
+                ) : (
+                  <NoteList
+                    notesList={notesList}
+                    setNoteList={(newValue) => setNoteList(newValue)}
+                    markAsDone={markAsDone}
+                  />
+                )}
+              </div>
+
+              <Footer trunOnAddForm={() => setIsAddNoteShown(true)} />
+            </div>
+          </div>
         </div>
-      </div>
+        {isAddNoteShown && (
+          <AddNote
+            saveNewNote={saveNewNote}
+            turnOffForm={() => setIsAddNoteShown(false)}
+          />
+        )}
+      </main>
+    );
+  }
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-        <div className={styles.thirteen}>
-          <Image src="/thirteen.svg" alt="13" width={40} height={31} priority />
-        </div>
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://beta.nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+  return <Loading />;
 }
