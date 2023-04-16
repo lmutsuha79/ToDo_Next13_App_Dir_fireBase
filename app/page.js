@@ -26,28 +26,24 @@ import {
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
-  const markAsDone = useCallback(() =>{
-    console.log("markAsDone");
+  const markAsDone = useCallback(async (noteId, newIsDoneState) => {
+    console.log(newIsDoneState);
 
-    // const docRef = doc(db, "toDos", noteId);
-    // const docSnap = await getDoc(docRef);
-    // if (docSnap.exists()) {
-    //   // check if the userId in the note is the same ass the userId in the session
-    //   if (docSnap.data().userId == user.uid) {
-    //     // update the document
-    //     await setDoc(docRef, {
-    //       ...docSnap.data(),
-    //       isDone: true,
-    //     });
-    //     console.log("marked as done");
-    //   } else {
-    //   }
-    // } else {
-    //   // docSnap.data() will be undefined in this case
-    //   console.log("No such document!");
-    // }
-  },[])
-
+    const docRef = doc(db, "toDos", noteId);
+    // search for the note in the db
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      // check if the userId in the note is the same ass the userId in the session
+      if (docSnap.data().userId == user.uid) {
+        // update the document
+        await setDoc(docRef, {
+          ...docSnap.data(),
+          isDone: newIsDoneState,
+        });
+        console.log("done ! ");
+      }
+    }
+  }, []);
 
   initfirebase();
   const auth = getAuth();

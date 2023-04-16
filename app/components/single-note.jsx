@@ -5,22 +5,17 @@ import Datepicker from "flowbite-datepicker/Datepicker";
 import { collection, doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 
-const SingleNot = ({
-  title,
-  checked,
-  id,
-  desc,
-  dueDate,
-  isDone,
-  markAsDone,
-}) => {
+const SingleNot = ({ title, id, desc, dueDate, isDone, markAsDone }) => {
   const [noteIsOppen, setNoteIsOppen] = useState(false);
+  const [noteIsDone, setNoteIsDone] = useState(isDone);
+
   function handleTheDoneIconClick(e) {
     e.stopPropagation();
-
     console.log("done clicked");
+    markAsDone(id, !noteIsDone);
+    setNoteIsDone(!noteIsDone);
   }
-  // proble of two calls of the function
+
   function handleNoteClick(e) {
     if (e.target.tagName.toLowerCase() != "div") {
       return;
@@ -49,7 +44,7 @@ const SingleNot = ({
               className="hidden"
               type="checkbox"
               id={`check_box_${id}`}
-              checked={checked}
+              checked={noteIsDone}
               onChange={handleTheDoneIconClick}
             />
             <label
