@@ -1,7 +1,16 @@
 const Loading = () => {
   return (
-    <div className="grid place-items-center bg-gray-800 w-screen h-screen fixed top-0 left-0 z-[99]">
-      <p className="text-blue-gray text-md font-medium"> Loading ...</p>
+    <div className="flex flex-col gap-4 justify-center items-center h-screen bg-gray-800">
+      {/* <div class="wave"> */}
+      <div className="flex">
+        <div class="ball"></div>
+        <div class="ball"></div>
+        <div class="ball"></div>
+        <div class="ball"></div>
+        <div class="ball"></div>
+      </div>
+      {/* </div> */}
+      <p className="text-blue-gray text-md font-medium"> Loading </p>
     </div>
   );
 };

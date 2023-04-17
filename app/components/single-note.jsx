@@ -24,12 +24,6 @@ const SingleNot = ({ title, id, desc, dueDate, isDone, markAsDone }) => {
     setNoteIsOppen(!noteIsOppen);
   }
 
-  // async function handleNoteClick() {
-  //   console.log("noteIsOppen");
-  //   markAsDone(id);
-  //   // change in UI
-  //   setNoteIsOppen(() => !noteIsOppen);
-  // }
   return (
     <div
       onClick={handleNoteClick}

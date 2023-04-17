@@ -10,7 +10,10 @@ import { useRouter } from "next/navigation";
 import { getAuth, signOut } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { db, initfirebase } from "@/firebase";
+import { ToastContainer } from "react-toastify";
+import { notify } from "@/util/notify";
 import Loading from "./components/loading";
+
 import {
   Firestore,
   addDoc,
@@ -41,6 +44,7 @@ export default function Home() {
           isDone: newIsDoneState,
         });
         console.log("done ! ");
+        notify("success", "the new note status has beed saved");
       }
     }
   }, []);
@@ -99,9 +103,11 @@ export default function Home() {
         order: notesList.length + 1,
       });
       console.log("saved");
+      notify("success", "the new note was successfully created");
       getAllNotes();
     } catch (error) {
       console.log("not saved");
+      notify("error", "an error occurred while saving try again");
       console.log(error);
     }
   }
@@ -119,6 +125,8 @@ export default function Home() {
 
     return (
       <main>
+        <ToastContainer />
+
         <div className="flex items-center justify-center w-screen h-screen font-medium">
           <div className="flex flex-grow items-center justify-center bg-gray-900 h-full">
             <div className="relative h-[80vh]  max-w-full px-8 bg-gray-800 rounded-lg shadow-lg w-96 text-gray-200">
