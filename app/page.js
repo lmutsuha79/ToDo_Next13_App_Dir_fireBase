@@ -9,7 +9,7 @@ import NoteList from "./components/note-list";
 import { useRouter } from "next/navigation";
 import { getAuth, signOut } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { db, initfirebase } from "@/firebase";
+import { db, initfirebase } from "@/app/firebase";
 import { ToastContainer } from "react-toastify";
 import { notify } from "@/util/notify";
 import Loading from "./components/loading";
@@ -48,7 +48,7 @@ export default function Home() {
       }
     }
   }, []);
-
+  console.log(process.env.API_KEY);
   initfirebase();
   const auth = getAuth();
   const [user, loading] = useAuthState(auth);

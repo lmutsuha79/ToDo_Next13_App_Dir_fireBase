@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Datepicker from "flowbite-datepicker/Datepicker";
 import { collection, doc, setDoc, updateDoc } from "firebase/firestore";
-import { db } from "@/firebase";
+import { db } from "@/app/firebase";
 
 const SingleNot = ({ title, id, desc, dueDate, isDone, markAsDone }) => {
   const [noteIsOppen, setNoteIsOppen] = useState(false);

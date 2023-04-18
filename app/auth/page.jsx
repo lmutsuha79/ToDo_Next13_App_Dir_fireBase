@@ -1,6 +1,6 @@
 "use client";
 
-import { initFireBase } from "@/firebase";
+import { initFireBase } from "@/app/firebase";
 import {
   createUserWithEmailAndPassword,
   getAuth,
